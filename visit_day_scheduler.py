@@ -7,61 +7,57 @@ import csv
 import sys
 
 NUM_SLOTS = 10
+
+
 PROFESSORS = \
 [
-    "kleinbergb",
-    "steurer"
+  # actual professors
+  "Birman Ken",
+  "Albonesi,David",
+  "Bala Kavita",
+  "Batten Christopher",
+  "Bindel David",
+  "Cardie Claire",
+  "Chen Tsuhan",
+  "Choudhury Tanzeem",
+  "Constable Bob",
+  "Cosley Dan",
+  "Demers Al",
+  "Edelman Shimon",
+  "Foster Nate",
+  "Ghosh Arpita",
+  "Guimbretiere Francois ",
+  "Halpern Joe",
+  "Hirsch Haym",
+  "Hopcroft John",
+  "James Doug",
+  "Joachims Thorsten",
+  "Kleinberg Bobby",
+  "Kleinberg Jon",
+  "Kozen Dexter",
+  "Kress-Gazit Hadas",
+  "Lee Lillian",
+  "Lipson Hod",
+  "Marschner Steve",
+  "Martinez Jose",
+  "Mimno David",
+  "Myers Andrew",
+  "Nerode Anil",
+  "Saxena Ashutosh",
+  "Senges Phoebe",
+  "Shmoys David",
+  "Sirer Gun",
+  "Steurer David",
+  "Tardos Eva",
+  "Tate Ross",
+  "Van Loan Charlie",
+  "Van Renesse Robbert",
+  "Weatherspoon Hakim",
+  "Williamson David",
+  "Zhang Zhiru"
+
+  # students
 ]
-
-
-# PROFESSORS = \
-# [
-#     # from spreadsheet
-#     "bailey",
-#     "bala",
-#     "bickford",
-#     "bindel",
-#     "birman",
-#     "cardie",
-#     "constable",
-#     "demers",
-#     "fan",
-#     "foster",
-#     "gehrke",
-#     "george",
-#     "gomes",
-#     "gries",
-#     "halpern",
-#     "hartmanis",
-#     "hopcroft",
-#     "james",
-#     "joachims",
-#     "kleinbergb",
-#     "kleinbergj",
-#     "kot",
-#     "kozen",
-#     "kreitz",
-#     "lee",
-#     "marschner",
-#     "myers",
-#     "snavely",
-#     "renesse",
-#     "saxena",
-#     "schneider",
-#     "selman",
-#     "sirer",
-#     "steurer",
-#     "tardos",
-#     "tate",
-#     "vanloan",
-#     "weatherspoon",
-#     "white",
-
-#     # others
-#     "williamson",
-#     "shmoys",
-#     "lipson"
-# ]
 
 VISITORS = \
 [
@@ -75,14 +71,48 @@ VISITORS = \
     "busy8",
     "busy9",
     "busy10",
-
-    "foo1",
-    "foo2",
-    "foo3",
-    "foo4",
-    "foo5",
-    "foo6",
-    "foo7"
+    "Isaac Ackerman",
+    "Hani Altwaijry",
+    "Noah Apthorpe",
+    "Tom Ashmore",
+    "Brian Bullins",
+    "Sorathan Chaturapruek",
+    "Kyle Croman",
+    "Yin Cui",
+    "Dylan Foster",
+    "Ben Greenman",
+    "Greg Izatt",
+    "Francisco Mota",
+    "Steven Frink",
+    "Ankush Gupta",
+    "John Hessel",
+    "Alexandre Kaspar",
+    "Jason Koenig",
+    "Dimitris Konomis",
+    "Eric Lei",
+    "Praveen Kumar",
+    "Mengqi Liu",
+    "Tianren Liu",
+    "Benjamin Mehne",
+    "Elliot Meyerson",
+    "Peihan Miao",
+    "Mohammad Moghimi",
+    "Grace Muzny",
+    "Julie Newcomb",
+    "Fabian Okeke",
+    "Aldo Pacchiano",
+    "Raghu Maithreyi",
+    "Aaron Schild",
+    "Alexandra Schofield",
+    "Daniel Seita",
+    "Warut Suksumpong",
+    "Dan Stubbs",
+    "Raphael Townshend",
+    "Grant Van Horn",
+    "Andreas Veit",
+    "Yining Wang",
+    "Jiajun Wu",
+    "Yi Wu",
 ]
 
 def recursive_or(lst):
@@ -114,7 +144,7 @@ def get_meeting_constraint(visitor_val, professor_index, faculty_var_arrays):
 
 def get_busy_constraint(slot, professor_index, faculty_var_arrays):
   professor = faculty_var_arrays[professor_index]
-  constraints = [prof[slot] == i for i in BUSY]
+  constraints = [professor[slot] == VISITORS[i] for i in range(10)] # first 10 visitors are busy dummies
   return recursive_or(constraints)
 
 def get_no_repeat_constraints(faculty_var_arrays):
@@ -127,24 +157,36 @@ def main():
   model.add(get_visitor_consistency_constraints(faculty_var_arrays))
   model.add(get_no_repeat_constraints(faculty_var_arrays))
 
-  ifile = open(sys.argv[1], 'rb')
-  reader = csv.reader(ifile)
+  # read faculty availability information
+  busyfile = open(sys.argv[2], 'rb')
+  busyreader = csv.reader(busyfile)
+  for r in busyreader:
+    prof_index = PROFESSORS.index(r[0])
+    for i in range(1,11): # monday meeting openings
+      if r[i] == "NO":
+        model.add(get_busy_constraint(i-1, prof_index, faculty_var_arrays))
+  busyfile.close()
+
+  requestfile = open(sys.argv[1], 'rb')
+  reader = csv.reader(requestfile)
   for r in reader:
-    row = [name for name in r if name is not ","]
+    row = [name for name in r if not (name == "," or name == "" or name == " ")]
     if row[0] in VISITORS:
       for i in range(1,len(row)):
         if not (row[i] in PROFESSORS):
-          print "name mismatch in row " + str(row)
+          print "professor name mismatch: " + str(row[i])
         else:
           model.add(get_meeting_constraint(VISITORS.index(row[0]), PROFESSORS.index(row[i]), faculty_var_arrays))
     elif row[0] in PROFESSORS:
       for i in range(1,len(row)):
         if not (row[i] in VISITORS):
-          print "name mismatch in row " + str(row)
+          print "visitor name mismatch in row " + str(row)
         else:
           model.add(get_meeting_constraint(VISITORS.index(row[i]), PROFESSORS.index(row[0]), faculty_var_arrays))
     else:
-      print "name mismatch in row " + str(row)
+      print "requestor name mismatch in row " + str(row)
+
+  print(model)
 
   solver = Solver(model, [p[s] for p in faculty_var_arrays for s in range(NUM_SLOTS)])
   solver.solve()
@@ -158,7 +200,8 @@ def main():
       print VISITORS[slot.get_value()]
 
   # print(solver)
-  ifile.close()
+  requestfile.close()
+
 
 if __name__ == "__main__":
   main()
