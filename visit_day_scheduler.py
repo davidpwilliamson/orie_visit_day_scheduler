@@ -6,55 +6,47 @@ from Mistral import Solver
 import csv
 import sys
 
-NUM_SLOTS = 10
+NUM_SLOTS = 15
 
 
 PROFESSORS = \
 [
   # actual professors
-  "Birman Ken",
-  "Albonesi,David",
+#  "Birman Ken",
   "Bala Kavita",
-  "Batten Christopher",
-  "Bindel David",
-  "Cardie Claire",
-  "Chen Tsuhan",
-  "Choudhury Tanzeem",
-  "Constable Bob",
+#  "Cardie Claire",
+#  "Chen Tsuhan",
+#  "Choudhury Tanzeem",
+#  "Constable Bob",
   "Cosley Dan",
-  "Demers Al",
-  "Edelman Shimon",
-  "Foster Nate",
-  "Ghosh Arpita",
-  "Guimbretiere Francois ",
-  "Halpern Joe",
-  "Hirsch Haym",
+#  "Edelman Shimon",
+#  "Foster Nate",
+#  "Ghosh Arpita",
+#  "Halpern Joe",
+#  "Hirsch Haym",
   "Hopcroft John",
   "James Doug",
-  "Joachims Thorsten",
-  "Kleinberg Bobby",
-  "Kleinberg Jon",
-  "Kozen Dexter",
-  "Kress-Gazit Hadas",
+#  "Joachims Thorsten",
+#  "Kleinberg Bobby",
+#  "Kleinberg Jon",
+#  "Kozen Dexter",
   "Lee Lillian",
-  "Lipson Hod",
+#  "Lipson Hod",
   "Marschner Steve",
   "Martinez Jose",
   "Mimno David",
-  "Myers Andrew",
+#  "Myers Andrew",
   "Nerode Anil",
-  "Saxena Ashutosh",
+#  "Saxena Ashutosh",
   "Senges Phoebe",
   "Shmoys David",
-  "Sirer Gun",
-  "Steurer David",
-  "Tardos Eva",
+#  "Sirer Gun",
+#  "Steurer David",
+#  "Tardos Eva",
   "Tate Ross",
-  "Van Loan Charlie",
   "Van Renesse Robbert",
   "Weatherspoon Hakim",
   "Williamson David",
-  "Zhang Zhiru"
 
   # students
 ]
@@ -71,6 +63,32 @@ VISITORS = \
     "busy8",
     "busy9",
     "busy10",
+    "busy11",
+    "busy12",
+    "busy13",
+    "busy14",
+    "busy15",
+    "busy16",
+    "busy17",
+    "busy18",
+    "busy19",
+    "busy20",
+    "busy21",
+    "busy22",
+    "busy23",
+    "busy24",
+    "busy25",
+    "busy26",
+    "busy27",
+    "busy28",
+    "busy29",
+    "busy30",
+    "busy31",
+    "busy32",
+    "busy33",
+    "busy34",
+    "busy35",
+
     "Isaac Ackerman",
     "Hani Altwaijry",
     "Noah Apthorpe",
@@ -144,7 +162,7 @@ def get_meeting_constraint(visitor_val, professor_index, faculty_var_arrays):
 
 def get_busy_constraint(slot, professor_index, faculty_var_arrays):
   professor = faculty_var_arrays[professor_index]
-  constraints = [professor[slot] == VISITORS[i] for i in range(10)] # first 10 visitors are busy dummies
+  constraints = [professor[slot] == i for i in range(35)] # first 35 visitors are busy dummies
   return recursive_or(constraints)
 
 def get_no_repeat_constraints(faculty_var_arrays):
@@ -161,10 +179,13 @@ def main():
   busyfile = open(sys.argv[2], 'rb')
   busyreader = csv.reader(busyfile)
   for r in busyreader:
-    prof_index = PROFESSORS.index(r[0])
-    for i in range(1,11): # monday meeting openings
-      if r[i] == "NO":
-        model.add(get_busy_constraint(i-1, prof_index, faculty_var_arrays))
+    if r[0] in PROFESSORS:
+      prof_index = PROFESSORS.index(r[0])
+      for i in range(1,NUM_SLOTS + 1): 
+        if r[i] == "NO":
+          model.add(get_busy_constraint(i-1, prof_index, faculty_var_arrays))
+    else:
+      print "professor not found in list"
   busyfile.close()
 
   requestfile = open(sys.argv[1], 'rb')
@@ -189,6 +210,7 @@ def main():
   print(model)
 
   solver = Solver(model, [p[s] for p in faculty_var_arrays for s in range(NUM_SLOTS)])
+  solver.setVerbosity(2)
   solver.solve()
   # print(solver.solveAndRestart())
   print "PROFESSOR SCHEDULES"
