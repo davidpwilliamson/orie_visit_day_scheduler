@@ -13,39 +13,38 @@ PROFESSORS = \
 [
   # actual professors
 #  "Birman Ken",
-  "Bala Kavita",
+#  "Bala Kavita",
 #  "Cardie Claire",
 #  "Chen Tsuhan",
 #  "Choudhury Tanzeem",
 #  "Constable Bob",
-  "Cosley Dan",
+#  "Cosley Dan",
 #  "Edelman Shimon",
 #  "Foster Nate",
 #  "Ghosh Arpita",
 #  "Halpern Joe",
 #  "Hirsch Haym",
-  "Hopcroft John",
-  "James Doug",
+#  "Hopcroft John",
+#  "James Doug",
 #  "Joachims Thorsten",
 #  "Kleinberg Bobby",
-#  "Kleinberg Jon",
+  "Kleinberg Jon",
 #  "Kozen Dexter",
-  "Lee Lillian",
+#  "Lee Lillian",
 #  "Lipson Hod",
-  "Marschner Steve",
-  "Martinez Jose",
-  "Mimno David",
+#  "Marschner Steve",
+#  "Martinez Jose",
+#  "Mimno David",
 #  "Myers Andrew",
-  "Nerode Anil",
 #  "Saxena Ashutosh",
-  "Senges Phoebe",
-  "Shmoys David",
+#  "Senges Phoebe",
+#  "Shmoys David",
 #  "Sirer Gun",
 #  "Steurer David",
 #  "Tardos Eva",
-  "Tate Ross",
-  "Van Renesse Robbert",
-  "Weatherspoon Hakim",
+#  "Tate Ross",
+#  "Van Renesse Robbert",
+#  "Weatherspoon Hakim",
   "Williamson David",
 
   # students
@@ -53,42 +52,6 @@ PROFESSORS = \
 
 VISITORS = \
 [
-    "busy1",
-    "busy2",
-    "busy3",
-    "busy4",
-    "busy5",
-    "busy6",
-    "busy7",
-    "busy8",
-    "busy9",
-    "busy10",
-    "busy11",
-    "busy12",
-    "busy13",
-    "busy14",
-    "busy15",
-    "busy16",
-    "busy17",
-    "busy18",
-    "busy19",
-    "busy20",
-    "busy21",
-    "busy22",
-    "busy23",
-    "busy24",
-    "busy25",
-    "busy26",
-    "busy27",
-    "busy28",
-    "busy29",
-    "busy30",
-    "busy31",
-    "busy32",
-    "busy33",
-    "busy34",
-    "busy35",
-
     "Isaac Ackerman",
     "Hani Altwaijry",
     "Noah Apthorpe",
@@ -133,6 +96,10 @@ VISITORS = \
     "Yi Wu",
 ]
 
+for prof in PROFESSORS:
+  busy_arr = ["busy" for i in range(NUM_SLOTS)]
+  VISITORS = busy_arr + VISITORS
+
 def recursive_or(lst):
   if len(lst) == 1:
     return lst[0]
@@ -144,6 +111,7 @@ def recursive_and(lst):
       return lst[0]
   else:
     return lst[0] | recursive_or(lst[1:])
+
 
 def get_prof(visitors):
   return VarArray(NUM_SLOTS, len(visitors))
@@ -162,8 +130,9 @@ def get_meeting_constraint(visitor_val, professor_index, faculty_var_arrays):
 
 def get_busy_constraint(slot, professor_index, faculty_var_arrays):
   professor = faculty_var_arrays[professor_index]
-  constraints = [professor[slot] == i for i in range(35)] # first 35 visitors are busy dummies
-  return recursive_or(constraints)
+  val_index = (professor_index*15 + slot)
+  # print "busy constraint for " + PROFESSORS[professor_index] + "(index " + str(professor_index) + ")" + " will set slot " + str(slot) + " to " + str(val_index)
+  return (professor[slot] == val_index)
 
 def get_no_repeat_constraints(faculty_var_arrays):
   constraints = [AllDiff(prof) for prof in faculty_var_arrays]
@@ -206,8 +175,6 @@ def main():
           model.add(get_meeting_constraint(VISITORS.index(row[i]), PROFESSORS.index(row[0]), faculty_var_arrays))
     else:
       print "requestor name mismatch in row " + str(row)
-
-  print(model)
 
   solver = Solver(model, [p[s] for p in faculty_var_arrays for s in range(NUM_SLOTS)])
   solver.setVerbosity(2)
