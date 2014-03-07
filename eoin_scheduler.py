@@ -2,6 +2,9 @@ from Numberjack import *
 from Mistral import Solver
 import sys
 import visit_day_scheduler
+import csv
+
+header = ["Visitor", "9:40 -- 10:00", "10:05 -- 10:25", "10:30 -- 10:50", "11:00 -- 11:20", "11:25 -- 11:45","3:00 -- 3:20", "3:25 -- 3:45", "3:50 -- 4:10", "4:15 -- 4:35", "4:40 -- 5:00", "11:00 -- 11:20", "11:25 -- 11:45", "11:50 -- 12:10", "12:15 -- 12:35", "12:40 -- 1:00"]
 
 # This one works well
 def solveSchedule():
@@ -32,7 +35,7 @@ def solveSchedule():
       if s == "Aaron Schild":
           studentMeetings[s] = [Variable(0,10) for i in students[s]]
       elif s == "Ben Greenman":
-         studentMeetings[s] = [Variable(9,15) for i in students[s]]
+         studentMeetings[s] = [Variable(10,15) for i in students[s]]
       elif s == "Tom Ashmore":
           studentMeetings[s] = [Variable(0,10) for i in students[s]]
       else:
@@ -54,11 +57,18 @@ def solveSchedule():
     solver.setTimeLimit(10)
 
     if solver.solve() or True:
+        outfile = open("out.csv", "wb")
+        outwriter = csv.writer(outfile)
+        outwriter.writerow(header) 
         for s in visit_day_scheduler.VISITORS:
-            print s
+            outRow = [s] + ["" for i in range(15)]
             for i in range(len(studentMeetings[s])):
                 if profResources.has_key(students[s][i]):
-                    print "\t", students[s][i], studentMeetings[s][i]
+                    meeting = int(str(studentMeetings[s][i]))
+                    if meeting < 15:
+                      outRow[meeting + 1] = str(students[s][i])
+            outwriter.writerow(outRow)
+#                    print "\t", students[s][i], studentMeetings[s][i]
 """
 def solveScheduleTask():
 

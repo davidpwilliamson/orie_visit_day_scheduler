@@ -83,7 +83,21 @@ PROFESSORS = \
   "Park Jon",
   "Arden Owen",
   "Smolka Steffen",
-  "Li Erluo"
+  "Li Erluo",
+
+  # WIC meeting
+  "WIC1a",
+  "WIC1b",
+  "WIC1c",
+  "WIC1d",
+  "WIC1e",
+  "WIC1f",
+  "WIC2a",
+  "WIC2b",
+  "WIC2c",
+  "WIC2d",
+  "WIC2e",
+  "WIC2f",
 ]
 
 VISITORS = \
