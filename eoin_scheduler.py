@@ -28,29 +28,38 @@ def solveSchedule():
     studentMeetings = {}
     obj = []
     for s in visit_day_scheduler.VISITORS:
-        studentMeetings[s] = [Variable(0, 32) for i in students[s]]
-        for i in range(len(students[s])):
-            if profResources.has_key(students[s][i]):
-                profResources[ students[s][i] ].append(studentMeetings[s][i])
-        if len(studentMeetings[s]) > 1: model.add(AllDiff(studentMeetings[s]))
+      # special cases for visitors leaving/arriving early/late
+      if s == "Aaron Schild":
+          studentMeetings[s] = [Variable(0,10) for i in students[s]]
+      elif s == "Ben Greenman":
+         studentMeetings[s] = [Variable(9,15) for i in students[s]]
+      elif s == "Tom Ashmore":
+          studentMeetings[s] = [Variable(0,10) for i in students[s]]
+      else:
+        studentMeetings[s] = [Variable(0, 48) for i in students[s]]
+      for i in range(len(students[s])):
+          if profResources.has_key(students[s][i]):
+              profResources[ students[s][i] ].append(studentMeetings[s][i])
+      if len(studentMeetings[s]) > 1: model.add(AllDiff(studentMeetings[s]))
 
-        obj_test = [i > 16 for i in studentMeetings[s]]
-        obj.extend(obj_test)
+      obj_test = [i > 14 for i in studentMeetings[s]]
+      obj.extend(obj_test)
 
-    model.add([AllDiff(x) for x in profResources.values()])
+    model.add([AllDiff(x) for x in profResources.values() if len(x) > 1])
 
     model.add(Minimize(Sum(obj)))
 
     solver = Solver(model)
     solver.setVerbosity(2)
     solver.setTimeLimit(10)
-    if solver.solve():
+
+    if solver.solve() or True:
         for s in visit_day_scheduler.VISITORS:
             print s
             for i in range(len(studentMeetings[s])):
                 if profResources.has_key(students[s][i]):
                     print "\t", students[s][i], studentMeetings[s][i]
-
+"""
 def solveScheduleTask():
 
 
@@ -91,6 +100,7 @@ def solveScheduleTask():
 
     solver = Solver(model)
     solver.setVerbosity(2)
+    solver.setTimeLimit(10)
     print solver.solve()
 
     for s in visit_day_scheduler.VISITORS:
@@ -98,6 +108,7 @@ def solveScheduleTask():
         for i in range(len(studentMeetings[s])):
             if profResources.has_key(students[s][i]):
                 print "\t", students[s][i], studentMeetings[s][i]
+"""
 
 if __name__ == "__main__":
     # Parse the data in a way that seems easy at 2am
