@@ -12,6 +12,7 @@ NUM_SLOTS = 15
 PROFESSORS = \
 [
   # actual professors
+  "Bindel David",
   "Birman Ken",
   "Bala Kavita",
   "Cardie Claire",
@@ -52,6 +53,7 @@ PROFESSORS = \
   "Williamson David",
   "Easley David",
   "Frazier Peter",
+  "Blume Lawrence",
 
   # students
   "Magrino Tom",
@@ -80,7 +82,8 @@ PROFESSORS = \
   "Wang Lu",
   "Park Jon",
   "Arden Owen",
-  "Smolka Steffen"
+  "Smolka Steffen",
+  "Li Erluo"
 ]
 
 VISITORS = \
