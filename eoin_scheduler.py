@@ -31,21 +31,15 @@ def solveSchedule():
     studentMeetings = {}
     obj = []
     for s in visit_day_scheduler.VISITORS:
-      # special cases for visitors leaving/arriving early/late
-      if s == "Aaron Schild":
-          studentMeetings[s] = [Variable(0,10) for i in students[s]]
-      elif s == "Ben Greenman":
-         studentMeetings[s] = [Variable(10,15) for i in students[s]]
-      elif s == "Tom Ashmore":
-          studentMeetings[s] = [Variable(0,10) for i in students[s]]
-      else:
-        studentMeetings[s] = [Variable(0, 48) for i in students[s]]
+      # 4 is a magic number which seems to make things SAT so mistral stays happy
+      studentMeetings[s] = [Variable(0, 4*visit_day_scheduler.NUM_SLOTS) for i in students[s]]
       for i in range(len(students[s])):
           if profResources.has_key(students[s][i]):
               profResources[ students[s][i] ].append(studentMeetings[s][i])
       if len(studentMeetings[s]) > 1: model.add(AllDiff(studentMeetings[s]))
-
-      obj_test = [i > 14 for i in studentMeetings[s]]
+      
+      # try to put meetings in actual slots, not fake ones
+      obj_test = [i > visit_day_scheduler.NUM_SLOTS - 1 for i in studentMeetings[s]]
       obj.extend(obj_test)
 
     model.add([AllDiff(x) for x in profResources.values() if len(x) > 1])
@@ -61,11 +55,11 @@ def solveSchedule():
         outwriter = csv.writer(outfile)
         outwriter.writerow(header) 
         for s in visit_day_scheduler.VISITORS:
-            outRow = [s] + ["" for i in range(15)]
+            outRow = [s] + ["" for i in range(visit_day_scheduler.NUM_SLOTS)]
             for i in range(len(studentMeetings[s])):
                 if profResources.has_key(students[s][i]):
                     meeting = int(str(studentMeetings[s][i]))
-                    if meeting < 15:
+                    if meeting < visit_day_scheduler.NUM_SLOTS: # only output real meetings
                       outRow[meeting + 1] = str(students[s][i])
             outwriter.writerow(outRow)
 #                    print "\t", students[s][i], studentMeetings[s][i]
