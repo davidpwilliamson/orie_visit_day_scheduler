@@ -148,7 +148,8 @@ def main():
     print "---------------"
     print "schedule for " + PROFESSORS[i]
     for slot in faculty_var_arrays[i]:
-      print VISITORS[slot.get_value()]
+      if slot.get_value()
+        print VISITORS[slot.get_value()]
 
   # print(solver)
   requestfile.close()
